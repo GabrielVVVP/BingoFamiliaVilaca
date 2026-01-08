@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Bingo Caller</title>
+    <!-- Load Tailwind CSS for simple, clean, and responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for high visibility on TV screens */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Very dark background */
+        }
+        #current-word {
+            text-shadow: 0 0 20px #0ff, 0 0 10px #0ff; /* Neon glow effect for TV */
+            min-height: 250px;
+        }
+        .btn-primary {
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        /* Ensure the main container takes up most of the screen height */
+        #app-container {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div id="app-container" class="flex flex-col items-center justify-center p-4">
+
+        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-cyan-400">
+            Voice Bingo Caller
+        </h1>
+
+        <!-- CURRENT WORD DISPLAY AREA -->
+        <div id="current-word" class="w-full max-w-4xl p-6 mb-8 text-center bg-gray-900 border-4 border-cyan-500 rounded-2xl flex items-center justify-center shadow-2xl">
+            <span id="display-text" class="text-8xl sm:text-[12rem] lg:text-[15rem] font-extrabold text-cyan-300 select-none">
+                READY
+            </span>
+        </div>
+
+        <!-- CONTROL BUTTONS -->
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full max-w-lg">
+            <button id="draw-button" class="btn-primary flex-1 py-4 px-6 text-2xl font-semibold rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-cyan-500 focus:ring-opacity-50">
+                Draw Next Word
+            </button>
+            <button id="reset-button" class="py-4 px-6 text-xl font-medium rounded-xl bg-gray-600 hover:bg-gray-700 text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-50">
+                Reset Game
+            </button>
+        </div>
+
+        <!-- DRAWN NUMBERS HISTORY (Minimized for TV screen) -->
+        <div class="mt-8 w-full max-w-4xl p-4 bg-gray-800 rounded-lg shadow-inner">
+            <h2 class="text-lg font-semibold mb-2 text-gray-300">Drawn History:</h2>
+            <div id="drawn-history" class="flex flex-wrap gap-2 text-sm text-gray-400">
+                <!-- History will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Firebase/Auth Setup (Standard Boilerplate, not directly used for Bingo logic) ---
+        // Note: For this local, single-user app, Firebase is not strictly needed, 
+        // but included as a standard practice for interactive web apps.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // This is a single-file app, so we can't use 'import'. 
+        // In a real environment, you'd load Firebase via script tags.
+        // For this task, we focus purely on the Bingo logic and UI.
+
+        // --- BINGO LOGIC ---
+
+        const BINGO_NUMBERS = {
+            B: Array.from({ length: 15 }, (_, i) => i + 1).map(n => `B${n}`), // B1-B15
+            I: Array.from({ length: 15 }, (_, i) => i + 16).map(n => `I${n}`), // I16-I30
+            N: Array.from({ length: 15 }, (_, i) => i + 31).map(n => `N${n}`), // N31-N45
+            G: Array.from({ length: 15 }, (_, i) => i + 46).map(n => `G${n}`), // G46-G60
+            O: Array.from({ length: 15 }, (_, i) => i + 61).map(n => `O${n}`)  // O61-O75
+        };
+
+        let allAvailableNumbers = [];
+        let drawnNumbers = [];
+        let isGameActive = false;
+
+        // DOM Elements
+        const displayElement = document.getElementById('display-text');
+        const drawButton = document.getElementById('draw-button');
+        const resetButton = document.getElementById('reset-button');
+        const historyElement = document.getElementById('drawn-history');
+
+        /**
+         * Initializes or resets the game state.
+         */
+        function initializeGame() {
+            // Flatten the numbers array and clone it for the available pool
+            allAvailableNumbers = Object.values(BINGO_NUMBERS).flat();
+            drawnNumbers = [];
+            isGameActive = true;
+
+            displayElement.textContent = 'START';
+            historyElement.innerHTML = '<span class="text-gray-600">No words drawn yet.</span>';
+            drawButton.disabled = false;
+            drawButton.textContent = 'Draw Next Word';
+        }
+
+        /**
+         * Plays the audio for the given word.
+         * NOTE: You MUST create a folder named 'audio' next to this HTML file,
+         * and place your MP3 files inside it, named exactly like the Bingo number (e.g., B1.mp3, I16.mp3).
+         * If the audio fails to load or play, the app will continue without sound.
+         * @param {string} word - The Bingo number (e.g., "B12").
+         */
+        function playWordAudio(word) {
+            const audioPath = `audio/${word}.mp3`;
+            console.log(`Attempting to play audio: ${audioPath}`);
+            try {
+                const audio = new Audio(audioPath);
+                
+                // Add error handling in case the file doesn't exist
+                audio.onerror = () => {
+                    console.error(`Error loading or playing audio for ${word}. Check if ${audioPath} exists.`);
+                    // Display a temporary message on screen instead of a disruptive alert
+                    displayElement.textContent = `${word} (Audio Failed)`;
+                    setTimeout(() => {
+                        displayElement.textContent = word;
+                    }, 1000);
+                };
+
+                audio.play().catch(e => {
+                    console.warn(`Playback initiated but likely paused or failed: ${e.message}`);
+                });
+            } catch (error) {
+                console.error("Could not create Audio object:", error);
+            }
+        }
+
+        /**
+         * Draws a random word/number, updates the display, and plays the audio.
+         */
+        function drawNextWord() {
+            if (!isGameActive) {
+                initializeGame();
+                return;
+            }
+
+            if (allAvailableNumbers.length === 0) {
+                displayElement.textContent = 'BINGO!';
+                drawButton.disabled = true;
+                drawButton.textContent = 'Game Over';
+                return;
+            }
+
+            // 1. Randomly select an index
+            const randomIndex = Math.floor(Math.random() * allAvailableNumbers.length);
+            
+            // 2. Get the word and remove it from the available pool
+            const newWord = allAvailableNumbers[randomIndex];
+            allAvailableNumbers.splice(randomIndex, 1);
+            
+            // 3. Add to drawn history
+            drawnNumbers.push(newWord);
+
+            // 4. Update the main display
+            displayElement.textContent = newWord;
+
+            // 5. Play the corresponding audio
+            playWordAudio(newWord);
+            
+            // 6. Update the history list
+            updateHistoryDisplay();
+        }
+
+        /**
+         * Updates the list of drawn numbers in the history area.
+         */
+        function updateHistoryDisplay() {
+            historyElement.innerHTML = '';
+            
+            if (drawnNumbers.length === 0) {
+                 historyElement.innerHTML = '<span class="text-gray-600">No words drawn yet.</span>';
+                 return;
+            }
+
+            // Display the drawn numbers, with the latest one highlighted
+            drawnNumbers.forEach((word, index) => {
+                const isLatest = index === drawnNumbers.length - 1;
+                const span = document.createElement('span');
+                span.textContent = word;
+                span.className = isLatest 
+                    ? 'font-bold text-lg text-cyan-400 border border-cyan-400 px-2 py-1 rounded-md' // Highlight latest
+                    : 'text-gray-400 px-1 py-0.5';
+
+                historyElement.appendChild(span);
+            });
+            // Scroll history to the end to show the latest word
+            historyElement.scrollTo({ left: historyElement.scrollWidth, behavior: 'smooth' });
+        }
+
+
+        // --- EVENT LISTENERS ---
+
+        drawButton.addEventListener('click', drawNextWord);
+        
+        resetButton.addEventListener('click', () => {
+             // Use a custom modal or message box instead of alert()
+            const confirmation = window.prompt("Are you sure you want to reset the game? Type 'RESET' to confirm.");
+            if (confirmation && confirmation.toUpperCase() === 'RESET') {
+                initializeGame();
+            } else {
+                 console.log("Reset cancelled.");
+            }
+        });
+        
+
+        // --- INITIALIZATION ---
+        initializeGame();
+
+    </script>
+</body>
+</html>
