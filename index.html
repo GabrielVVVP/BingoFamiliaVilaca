@@ -1,227 +1,324 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Bingo Caller</title>
-    <!-- Load Tailwind CSS for simple, clean, and responsive styling -->
+    <title>Bingo da Família Vilaça</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for high visibility on TV screens */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Very dark background */
+            background-color: #fdf2f2; /* Tom de fundo quente e acolhedor */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        #current-word {
-            text-shadow: 0 0 20px #0ff, 0 0 10px #0ff; /* Neon glow effect for TV */
-            min-height: 250px;
+        .main-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
         }
-        .btn-primary {
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
+        .number-display {
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
+            font-variant-numeric: tabular-nums;
         }
-        .btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.7);
-            transform: translateY(-2px);
+        .history-item {
+            animation: slideIn 0.3s ease-out;
         }
-        /* Ensure the main container takes up most of the screen height */
-        #app-container {
-            min-height: 100vh;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        /* Custom Switch para a IA */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px; width: 26px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(26px); }
     </style>
 </head>
-<body class="text-white">
-    <div id="app-container" class="flex flex-col items-center justify-center p-4">
+<body class="text-gray-800 min-h-screen flex flex-col items-center">
 
-        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-center text-cyan-400">
-            Voice Bingo Caller
+    <!-- CABEÇALHO E FOTO DA FAMÍLIA -->
+    <header class="w-full max-w-5xl px-6 pt-10 pb-6 text-center">
+        <h1 class="text-5xl md:text-6xl font-black text-red-600 drop-shadow-sm mb-4">
+            Bingo da Família Vilaça
         </h1>
-
-        <!-- CURRENT WORD DISPLAY AREA -->
-        <div id="current-word" class="w-full max-w-4xl p-6 mb-8 text-center bg-gray-900 border-4 border-cyan-500 rounded-2xl flex items-center justify-center shadow-2xl">
-            <span id="display-text" class="text-8xl sm:text-[12rem] lg:text-[15rem] font-extrabold text-cyan-300 select-none">
-                READY
-            </span>
-        </div>
-
-        <!-- CONTROL BUTTONS -->
-        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full max-w-lg">
-            <button id="draw-button" class="btn-primary flex-1 py-4 px-6 text-2xl font-semibold rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-cyan-500 focus:ring-opacity-50">
-                Draw Next Word
-            </button>
-            <button id="reset-button" class="py-4 px-6 text-xl font-medium rounded-xl bg-gray-600 hover:bg-gray-700 text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-50">
-                Reset Game
-            </button>
-        </div>
-
-        <!-- DRAWN NUMBERS HISTORY (Minimized for TV screen) -->
-        <div class="mt-8 w-full max-w-4xl p-4 bg-gray-800 rounded-lg shadow-inner">
-            <h2 class="text-lg font-semibold mb-2 text-gray-300">Drawn History:</h2>
-            <div id="drawn-history" class="flex flex-wrap gap-2 text-sm text-gray-400">
-                <!-- History will be injected here -->
+        
+        <!-- Espaço para a Foto da Família (altura ajustada para comportar a imagem) -->
+        <div class="flex justify-center mb-6 w-full">
+            <div class="max-w-4xl relative overflow-hidden shadow-xl border-4 border-white bg-gray-200 mx-auto">
+                <!-- IMPORTANTE: Substitua 'familia.jpg' pelo nome do seu arquivo de imagem na mesma pasta -->
+                <img src="familia.jpg" alt="Foto da Família Vilaça" class="w-full h-auto object-contain object-center block" onerror="this.src='https://via.placeholder.com/1200x600?text=Família+Vilaça'">
             </div>
         </div>
-    </div>
+        <p class="text-xl text-gray-600 italic">"Todo aqui mundo ama esse bingo!"</p>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="w-full max-w-4xl px-4 flex flex-col items-center">
+        
+        <!-- Painel de Exibição -->
+        <div id="display-panel" class="main-card w-full rounded-[3rem] p-10 border-4 border-red-500 flex flex-col items-center justify-center relative">
+            <div id="current-call" class="text-center">
+                <span id="label-letter" class="text-6xl md:text-8xl font-bold text-red-600 block leading-none">VAMOS</span>
+                <span id="label-number" class="text-[12rem] md:text-[8rem] font-black text-gray-900 leading-none number-display">JOGAR!</span>
+            </div>
+
+            <!-- (Removido overlay de loading da IA) -->
+        </div>
+
+        <!-- CONFIGURAÇÕES E CONTROLES -->
+        <div class="w-full mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            
+            <!-- Botões Principais -->
+            <div class="flex flex-col gap-4">
+                <button id="btn-draw" class="bg-red-600 hover:bg-red-700 text-white text-4xl font-bold py-6 rounded-2xl shadow-xl transition-transform active:scale-95">
+                    SORTEAR
+                </button>
+                <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 rounded-xl transition-all">
+                    Reiniciar Jogo
+                </button>
+            </div>
+
+            <!-- Opção de Voz (Local vs IA) -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col items-center">
+                <span class="text-lg font-bold mb-3 text-gray-700">Configuração de Voz</span>
+                <div class="flex items-center gap-4">
+                    <span class="font-medium text-gray-500">Local (WAV)</span>
+                </div>
+                <p class="text-xs text-gray-400 mt-4 text-center">
+                    O padrão são os seus arquivos na pasta /audio.
+                </p>
+                <div class="mt-4 w-full flex flex-col items-center">
+                    <label class="text-sm text-gray-500 mb-2">Selecionar voz gravada</label>
+                    <div class="flex gap-2 w-full">
+                        <select id="voice-select" class="flex-1 rounded-md border px-3 py-2">
+                            <option value="Danielle">Danielle</option>
+                        </select>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">Pasta atual: <span id="voice-current">Danielle</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTÓRICO -->
+        <div class="w-full mt-10 mb-20">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-700 border-b-2 border-red-200 pb-2">Números Sorteados:</h2>
+                <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <input id="sort-numeric" type="checkbox" class="form-checkbox h-4 w-4"> Ordenar numericamente
+                </label>
+            </div>
+            <div id="history-list" class="flex flex-wrap gap-3">
+                <!-- Injetado via JS -->
+            </div>
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-gray-700 mb-2">Números Remanescentes:</h3>
+                <div id="remaining-list" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        // --- Firebase/Auth Setup (Standard Boilerplate, not directly used for Bingo logic) ---
-        // Note: For this local, single-user app, Firebase is not strictly needed, 
-        // but included as a standard practice for interactive web apps.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        // This is a single-file app, so we can't use 'import'. 
-        // In a real environment, you'd load Firebase via script tags.
-        // For this task, we focus purely on the Bingo logic and UI.
+        // --- CONFIGURAÇÃO ---
+        const apiKey = ""; // Chave do Gemini (vazia por padrão)
+        const letters = ['B', 'I', 'N', 'G', 'O'];
+        let pool = [];
+        let drawn = [];
 
-        // --- BINGO LOGIC ---
+        // Elementos DOM
+        const lblLetter = document.getElementById('label-letter');
+        const lblNumber = document.getElementById('label-number');
+        const btnDraw = document.getElementById('btn-draw');
+        const btnReset = document.getElementById('btn-reset');
+        const historyList = document.getElementById('history-list');
+        const voiceSelect = document.getElementById('voice-select');
+        const voiceCurrent = document.getElementById('voice-current');
+        const sortNumeric = document.getElementById('sort-numeric');
+        const remainingList = document.getElementById('remaining-list');
 
-        const BINGO_NUMBERS = {
-            B: Array.from({ length: 15 }, (_, i) => i + 1).map(n => `B${n}`), // B1-B15
-            I: Array.from({ length: 15 }, (_, i) => i + 16).map(n => `I${n}`), // I16-I30
-            N: Array.from({ length: 15 }, (_, i) => i + 31).map(n => `N${n}`), // N31-N45
-            G: Array.from({ length: 15 }, (_, i) => i + 46).map(n => `G${n}`), // G46-G60
-            O: Array.from({ length: 15 }, (_, i) => i + 61).map(n => `O${n}`)  // O61-O75
-        };
+        // Pasta de voz selecionada (padrão = Danielle)
+        let voiceFolder = 'Danielle';
 
-        let allAvailableNumbers = [];
-        let drawnNumbers = [];
-        let isGameActive = false;
-
-        // DOM Elements
-        const displayElement = document.getElementById('display-text');
-        const drawButton = document.getElementById('draw-button');
-        const resetButton = document.getElementById('reset-button');
-        const historyElement = document.getElementById('drawn-history');
-
-        /**
-         * Initializes or resets the game state.
-         */
-        function initializeGame() {
-            // Flatten the numbers array and clone it for the available pool
-            allAvailableNumbers = Object.values(BINGO_NUMBERS).flat();
-            drawnNumbers = [];
-            isGameActive = true;
-
-            displayElement.textContent = 'START';
-            historyElement.innerHTML = '<span class="text-gray-600">No words drawn yet.</span>';
-            drawButton.disabled = false;
-            drawButton.textContent = 'Draw Next Word';
-        }
-
-        /**
-         * Plays the audio for the given word.
-         * NOTE: You MUST create a folder named 'audio' next to this HTML file,
-         * and place your MP3 files inside it, named exactly like the Bingo number (e.g., B1.mp3, I16.mp3).
-         * If the audio fails to load or play, the app will continue without sound.
-         * @param {string} word - The Bingo number (e.g., "B12").
-         */
-        function playWordAudio(word) {
-            const audioPath = `audio/${word}.mp3`;
-            console.log(`Attempting to play audio: ${audioPath}`);
-            try {
-                const audio = new Audio(audioPath);
-                
-                // Add error handling in case the file doesn't exist
-                audio.onerror = () => {
-                    console.error(`Error loading or playing audio for ${word}. Check if ${audioPath} exists.`);
-                    // Display a temporary message on screen instead of a disruptive alert
-                    displayElement.textContent = `${word} (Audio Failed)`;
-                    setTimeout(() => {
-                        displayElement.textContent = word;
-                    }, 1000);
-                };
-
-                audio.play().catch(e => {
-                    console.warn(`Playback initiated but likely paused or failed: ${e.message}`);
-                });
-            } catch (error) {
-                console.error("Could not create Audio object:", error);
+        function initPool() {
+            pool = [];
+            for (let i = 1; i <= 75; i++) {
+                const letter = letters[Math.floor((i - 1) / 15)];
+                pool.push({ l: letter, n: i, id: `${letter}${i}` });
             }
         }
 
-        /**
-         * Draws a random word/number, updates the display, and plays the audio.
-         */
-        function drawNextWord() {
-            if (!isGameActive) {
-                initializeGame();
-                return;
-            }
+        // --- SISTEMA DE ÁUDIO ---
 
-            if (allAvailableNumbers.length === 0) {
-                displayElement.textContent = 'BINGO!';
-                drawButton.disabled = true;
-                drawButton.textContent = 'Game Over';
-                return;
-            }
-
-            // 1. Randomly select an index
-            const randomIndex = Math.floor(Math.random() * allAvailableNumbers.length);
-            
-            // 2. Get the word and remove it from the available pool
-            const newWord = allAvailableNumbers[randomIndex];
-            allAvailableNumbers.splice(randomIndex, 1);
-            
-            // 3. Add to drawn history
-            drawnNumbers.push(newWord);
-
-            // 4. Update the main display
-            displayElement.textContent = newWord;
-
-            // 5. Play the corresponding audio
-            playWordAudio(newWord);
-            
-            // 6. Update the history list
-            updateHistoryDisplay();
-        }
-
-        /**
-         * Updates the list of drawn numbers in the history area.
-         */
-        function updateHistoryDisplay() {
-            historyElement.innerHTML = '';
-            
-            if (drawnNumbers.length === 0) {
-                 historyElement.innerHTML = '<span class="text-gray-600">No words drawn yet.</span>';
-                 return;
-            }
-
-            // Display the drawn numbers, with the latest one highlighted
-            drawnNumbers.forEach((word, index) => {
-                const isLatest = index === drawnNumbers.length - 1;
-                const span = document.createElement('span');
-                span.textContent = word;
-                span.className = isLatest 
-                    ? 'font-bold text-lg text-cyan-400 border border-cyan-400 px-2 py-1 rounded-md' // Highlight latest
-                    : 'text-gray-400 px-1 py-0.5';
-
-                historyElement.appendChild(span);
+        // 1. Áudio Local (Seus WAVs)
+        function playLocalAudio(id) {
+            const folderPath = voiceFolder ? `audio/${voiceFolder}/` : 'audio/';
+            const path = `${folderPath}${id}.wav`;
+            const audio = new Audio(path);
+            audio.preload = 'auto';
+            audio.play().catch(err => {
+                console.warn(`Falha ao reproduzir ${path}:`, err);
             });
-            // Scroll history to the end to show the latest word
-            historyElement.scrollTo({ left: historyElement.scrollWidth, behavior: 'smooth' });
         }
 
+        // 2. Áudio Gemini IA (Opcional)
+        async function playAiAudio(letter, number) {
+            if (!apiKey) {
+                console.error("API Key do Gemini não configurada.");
+                playLocalAudio(`${letter}${number}`);
+                return;
+            }
 
-        // --- EVENT LISTENERS ---
+            const prompt = `Diga de forma alegre e carinhosa para uma família reunida: Letra ${letter}, número ${number}!`;
 
-        drawButton.addEventListener('click', drawNextWord);
-        
-        resetButton.addEventListener('click', () => {
-             // Use a custom modal or message box instead of alert()
-            const confirmation = window.prompt("Are you sure you want to reset the game? Type 'RESET' to confirm.");
-            if (confirmation && confirmation.toUpperCase() === 'RESET') {
-                initializeGame();
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: { voiceName: "Aoede" } // Voz calorosa
+                                }
+                            }
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const base64 = data.candidates[0].content.parts[0].inlineData.data;
+                decodeAndPlay(base64);
+            } catch (err) {
+                console.error("Erro na IA, voltando para local:", err);
+                playLocalAudio(`${letter}${number}`);
+            }
+        }
+
+        // Auxiliar para tocar PCM do Gemini
+        function decodeAndPlay(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            
+            // Header WAV básico (24kHz Mono)
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+            const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+            writeStr(0, 'RIFF'); view.setUint32(4, 36 + bytes.length, true);
+            writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+            view.setUint32(24, 24000, true); view.setUint32(28, 48000, true);
+            view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+            writeStr(36, 'data'); view.setUint32(40, bytes.length, true);
+
+            const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
+            new Audio(URL.createObjectURL(blob)).play();
+        }
+
+        // --- LÓGICA DO JOGO ---
+
+        function draw() {
+            if (pool.length === 0) {
+                lblLetter.textContent = "FIM DE";
+                lblNumber.textContent = "JOGO!";
+                btnDraw.disabled = true;
+                return;
+            }
+
+            const idx = Math.floor(Math.random() * pool.length);
+            const picked = pool.splice(idx, 1)[0];
+            drawn.push(picked);
+
+            // Atualiza UI
+            lblLetter.textContent = picked.l;
+            lblNumber.textContent = picked.n;
+
+            // Usa áudio local (Gemini não está selecionável)
+            playLocalAudio(picked.id);
+
+            updateHistory();
+            updateRemaining();
+        }
+
+        function updateHistory() {
+            const items = drawn.slice();
+            let listOrder = [];
+            if (sortNumeric && sortNumeric.checked) {
+                items.sort((a, b) => a.n - b.n);
+                listOrder = items;
             } else {
-                 console.log("Reset cancelled.");
+                listOrder = items.slice().reverse();
+            }
+
+            historyList.innerHTML = listOrder.map(item => `
+                <div class="history-item bg-white border-2 border-red-200 px-4 py-2 rounded-xl shadow-sm text-lg font-bold text-gray-700">
+                    <span class="text-red-600">${item.l}</span>${item.n}
+                </div>
+            `).join('');
+        }
+
+        function updateRemaining() {
+            const drawnSet = new Set(drawn.map(d => d.n));
+            const remaining = [];
+            for (let i = 1; i <= 75; i++) {
+                if (!drawnSet.has(i)) remaining.push(i);
+            }
+
+            remainingList.innerHTML = remaining.map(n => `
+                <div class="px-3 py-2 rounded-xl bg-red-50 text-red-700 font-bold border border-red-200">${n}</div>
+            `).join('');
+        }
+
+        btnDraw.addEventListener('click', draw);
+        btnReset.addEventListener('click', () => {
+            if(confirm("Deseja reiniciar o Bingo da Família Vilaça?")) {
+                initPool();
+                drawn = [];
+                lblLetter.textContent = "PRONTOS?";
+                lblNumber.textContent = "VILAÇA";
+                historyList.innerHTML = "";
+                btnDraw.disabled = false;
+                updateHistory();
+                updateRemaining();
             }
         });
-        
 
-        // --- INITIALIZATION ---
-        initializeGame();
+        // --- Seletor de voz gravada ---
+        function setVoiceFolder(folder) {
+            voiceFolder = folder || 'Danielle';
+            voiceCurrent.textContent = voiceFolder;
+        }
 
+        voiceSelect.addEventListener('change', () => setVoiceFolder(voiceSelect.value));
+
+        // Inicializa com Danielle por padrão
+        setVoiceFolder('Danielle');
+
+        initPool();
+        // Inicializa histórico e remanescentes
+        updateHistory();
+        updateRemaining();
     </script>
 </body>
 </html>
