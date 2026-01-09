@@ -19,7 +19,7 @@
     <!-- CABEÇALHO E FOTO DA FAMÍLIA -->
     <header class="w-full max-w-5xl px-6 pt-10 pb-6 text-center">
         <h1 class="text-5xl md:text-6xl font-black drop-shadow-sm mb-4">
-            Bingo da Família Vilaça
+            Bingo da FV
         </h1>   
     </header>
 
@@ -29,8 +29,8 @@
         <!-- Painel de Exibição -->
         <div id="display-panel" class="main-card display-card w-full rounded-[3rem] p-10 flex flex-col items-center justify-center relative">
             <div id="current-call" class="text-center">
-                <span id="label-letter" class="text-4xl md:text-6xl font-bold block leading-none">VAMOS</span>
-                <span id="label-number" class="text-[4rem] md:text-[6rem] font-black leading-none number-display">JOGAR!</span>
+                <span id="label-letter" class="text-4xl md:text-6xl font-bold block leading-none">AGUARDANDO</span>
+                <span id="label-number" class="text-[4rem] md:text-[6rem] font-black leading-none number-display">SORTEIO!</span>
             </div>
 
             <!-- (Removido overlay de loading da IA) -->
@@ -45,7 +45,7 @@
                     SORTEAR NÚMEROS
                 </button>
                 <button id="btn-repeat" class="text-2xl font-bold py-3 rounded-2xl transition-transform active:scale-95 mt-2 shadow-sm" disabled>
-                    Repetir Som
+                    REPETIR SOM
                 </button>
             </div>
         </div>
@@ -71,7 +71,7 @@
                 </div>
                 <div id="remaining-list" class="flex flex-wrap gap-2"></div>
                 <div class="mt-4 flex justify-center">
-                    <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 px-6 rounded-xl transition-all">Reiniciar</button>
+                    <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 px-6 rounded-xl transition-all">REINICIAR JOGO</button>
                 </div>
             </div>
         </div>
@@ -348,11 +348,13 @@
 
         // --- Theme Toggle ---
         const themeToggle = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
             themeToggle.textContent = '☀️ Light';
+        } else {
+            themeToggle.textContent = '🌙 Dark';
         }
 
         themeToggle.addEventListener('click', () => {
