@@ -38,13 +38,13 @@
         </div>
 
         <!-- Buttons -->
-        <div class="w-full flex flex-col gap-6 max-w-sm">
+        <div class="w-full flex flex-col gap-6 max-w-sm mb-20">
             <a href="game.html" class="text-center text-4xl font-bold py-6 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-gold" id="btn-play">
                 COMEÇAR JOGO
             </a>
 
             <button id="btn-settings" class="text-2xl font-bold py-4 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-blue">
-                CONFIGURAÇÕES
+                CONFIGURAÇÕES/ÁUDIO
             </button>
 
             <button id="btn-about" class="text-2xl font-bold py-4 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-blue">
@@ -55,7 +55,7 @@
         <!-- Settings Modal -->
         <div id="settings-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-40">
             <div class="main-card rounded-3xl p-8 max-w-md w-full mx-4">
-                <h2 class="text-3xl font-bold text-accent mb-6">Configurações</h2>
+                <h2 class="text-3xl font-bold text-accent mb-6">Áudio do Jogo</h2>
                 
                 <div class="mb-6">
                     <label class="text-lg font-semibold modal-text block mb-3">Selecionar voz gravada</label>
@@ -63,14 +63,6 @@
                         <option value="Danielle">Danielle</option>
                     </select>
                     <p class="text-sm modal-text opacity-60 mt-2">Pasta atual: <span id="lobby-voice-current">Danielle</span></p>
-                </div>
-
-                <div class="mb-6">
-                    <label class="flex items-center gap-3 text-lg font-semibold modal-text cursor-pointer">
-                        <input id="lobby-auto-sound" type="checkbox" class="form-checkbox h-5 w-5">
-                        Usar som automático
-                    </label>
-                    <p class="text-sm modal-text opacity-60 mt-2">Reproduz o áudio ao sortear cada número</p>
                 </div>
 
                 <div class="flex gap-3">
@@ -91,13 +83,16 @@
                 
                 <div class="modal-text text-base mb-6 space-y-4">
                     <p>
-                        <strong>Bingo da Família Vilaça</strong> é um jogo divertido para reunir toda a família e aproveitar momentos especiais juntos.
+                        <strong>O Bingo da Família Vilaça</strong> é um jogo divertido com o objetivo de reunir todo mundo, agora em versão digital para facilitar ainda mais a diversão!
                     </p>
                     <p>
-                        Com suporte a áudio personalizado, você pode usar suas próprias vozes gravadas para tornar a experiência ainda mais significativa.
+                        Com suporte a áudio personalizado, você pode usar suas próprias vozes gravadas, que serão adicionadas ao longo do tempo. O áudio pode ser alterado no Menu Principal a qualquer momento clicando no botão "CONFIGURAÇÕES/ÁUDIO". Se estiver no jogo, basta voltar ao menu principal clicando em "Voltar" no canto superior esquerdo da tela.
                     </p>
                     <p>
-                        <strong>Como jogar:</strong> Clique em "COMEÇAR JOGO" para iniciar uma rodada. Cada número será sorteado com áudio personalizado.
+                        <strong>Como jogar:</strong> Clique em "COMEÇAR JOGO" para iniciar uma rodada. Depois clique em "SORTEAR NÚMERO" para começar a sortear o número da rodada. Cada número será sorteado com o áudio escolhido. Para escutar novamente, clique em "REPETIR SOM". Para sortear o próximo número, clique novamente em "SORTEAR NÚMERO". Para encerrar o jogo e começar outro é só clicar em "REINICIAR JOGO".
+                    </p>
+                    <p>
+                        <strong>Temas:</strong> A interface do jogo pode ser alterada entre temas claros (☀️ Light) e escuros (🌙 Dark), que ficam no canto superior direito da tela. 
                     </p>
                 </div>
 
@@ -111,11 +106,13 @@
     <script>
         // --- Theme Toggle ---
         const themeToggle = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
             themeToggle.textContent = '☀️ Light';
+        } else {
+            themeToggle.textContent = '🌙 Dark';
         }
 
         themeToggle.addEventListener('click', () => {
@@ -135,22 +132,18 @@
         const confirmSettings = document.getElementById('confirm-settings');
         const lobbyVoiceSelect = document.getElementById('lobby-voice-select');
         const lobbyVoiceCurrent = document.getElementById('lobby-voice-current');
-        const lobbyAutoSound = document.getElementById('lobby-auto-sound');
 
         // Load saved settings from localStorage
         function loadSettings() {
             const savedVoice = localStorage.getItem('voiceFolder') || 'Danielle';
-            const savedAutoSound = localStorage.getItem('autoSound') === 'true';
             
             lobbyVoiceSelect.value = savedVoice;
             lobbyVoiceCurrent.textContent = savedVoice;
-            lobbyAutoSound.checked = savedAutoSound;
         }
 
         // Save settings to localStorage
         function saveSettings() {
             localStorage.setItem('voiceFolder', lobbyVoiceSelect.value);
-            localStorage.setItem('autoSound', lobbyAutoSound.checked);
             lobbyVoiceCurrent.textContent = lobbyVoiceSelect.value;
         }
 
