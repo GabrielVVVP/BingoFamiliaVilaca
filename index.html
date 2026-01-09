@@ -93,8 +93,8 @@
                 <button id="btn-draw" class="bg-red-600 hover:bg-red-700 text-white text-4xl font-bold py-6 rounded-2xl shadow-xl transition-transform active:scale-95">
                     SORTEAR NÚMEROS
                 </button>
-                <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 rounded-xl transition-all">
-                    Reiniciar Jogo
+                <button id="btn-repeat" class="bg-yellow-500 hover:bg-yellow-600 text-white text-2xl font-bold py-3 rounded-2xl shadow transition-transform active:scale-95 mt-2" disabled>
+                    Repetir Som
                 </button>
             </div>
 
@@ -132,13 +132,16 @@
             </div>
             <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-bold text-gray-700">Números Remanescentes:</h3>
+                    <h2 class="text-2xl font-bold text-gray-700 border-b-2 border-red-200 pb-2">Números Remanescentes:</h2>
                     <label class="flex items-center gap-2 text-sm text-gray-600">
-                        <input id="toggle-remaining" type="checkbox" class="form-checkbox h-4 w-4" checked>
+                        <input id="toggle-remaining" type="checkbox" class="form-checkbox h-4 w-4">
                         Mostrar
                     </label>
                 </div>
                 <div id="remaining-list" class="flex flex-wrap gap-2"></div>
+                <div class="mt-4 flex justify-center">
+                    <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 px-6 rounded-xl transition-all">Reiniciar</button>
+                </div>
             </div>
         </div>
     </main>
@@ -155,6 +158,7 @@
         const lblNumber = document.getElementById('label-number');
         const btnDraw = document.getElementById('btn-draw');
         const btnReset = document.getElementById('btn-reset');
+        const btnRepeat = document.getElementById('btn-repeat');
         const historyList = document.getElementById('history-list');
         const voiceSelect = document.getElementById('voice-select');
         const voiceCurrent = document.getElementById('voice-current');
@@ -164,6 +168,9 @@
 
         // Pasta de voz selecionada (padrão = Danielle)
         let voiceFolder = 'Danielle';
+        let lastAudioId = null;
+        let currentAudio = null;
+        let isPlaying = false;
 
         function initPool() {
             pool = [];
@@ -177,12 +184,44 @@
 
         // 1. Áudio Local (Seus WAVs)
         function playLocalAudio(id) {
+            // Não inicia novo áudio enquanto outro estiver tocando
+            if (isPlaying) return;
+
             const folderPath = voiceFolder ? `audio/${voiceFolder}/` : 'audio/';
             const path = `${folderPath}${id}.wav`;
             const audio = new Audio(path);
+            currentAudio = audio;
+            isPlaying = true;
+            // trava botões enquanto toca
+            if (btnDraw) btnDraw.disabled = true;
+            if (btnRepeat) btnRepeat.disabled = true;
+
             audio.preload = 'auto';
-            audio.play().catch(err => {
+            audio.play().then(() => {
+                // registra o último áudio reproduzido (repetir será habilitado ao finalizar)
+                lastAudioId = id;
+            }).catch(err => {
                 console.warn(`Falha ao reproduzir ${path}:`, err);
+                // se falhar em iniciar, libera controles
+                isPlaying = false;
+                currentAudio = null;
+                if (btnDraw) btnDraw.disabled = false;
+                if (btnRepeat) btnRepeat.disabled = !lastAudioId;
+            });
+
+            audio.addEventListener('ended', () => {
+                isPlaying = false;
+                currentAudio = null;
+                if (btnDraw) btnDraw.disabled = false;
+                if (btnRepeat) btnRepeat.disabled = !lastAudioId;
+            });
+
+            audio.addEventListener('error', () => {
+                // em caso de erro durante a reprodução, garante que liberamos o travamento
+                isPlaying = false;
+                currentAudio = null;
+                if (btnDraw) btnDraw.disabled = false;
+                if (btnRepeat) btnRepeat.disabled = !lastAudioId;
             });
         }
 
@@ -246,6 +285,8 @@
         // --- LÓGICA DO JOGO ---
 
         function draw() {
+            if (isPlaying) return; // evita sortear enquanto áudio anterior toca
+
             if (pool.length === 0) {
                 lblLetter.textContent = "FIM DE";
                 lblNumber.textContent = "JOGO!";
@@ -302,14 +343,37 @@
         }
 
         btnDraw.addEventListener('click', draw);
+        if (btnRepeat) {
+            // botão de repetir som: toca o último áudio conhecido
+            btnRepeat.addEventListener('click', () => {
+                if (isPlaying) return; // bloqueia enquanto reproduz
+                if (lastAudioId) {
+                    playLocalAudio(lastAudioId);
+                } else {
+                    alert('Nenhum áudio disponível para repetir.');
+                }
+            });
+            // desabilita por padrão até que um áudio seja tocado
+            btnRepeat.disabled = true;
+        }
         btnReset.addEventListener('click', () => {
             if(confirm("Deseja reiniciar o Bingo da Família Vilaça?")) {
                 initPool();
                 drawn = [];
                 lblLetter.textContent = "PRONTOS?";
-                lblNumber.textContent = "VILAÇA";
+                lblNumber.textContent = "VAMOS MAIS UMA!";
                 historyList.innerHTML = "";
+                // para segurança, interrompe qualquer áudio em reprodução
+                if (currentAudio) {
+                    try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (e) {}
+                    currentAudio = null;
+                }
+                isPlaying = false;
                 btnDraw.disabled = false;
+                if (btnRepeat) {
+                    btnRepeat.disabled = true;
+                }
+                lastAudioId = null;
                 updateHistory();
                 updateRemaining();
             }
@@ -336,6 +400,8 @@
             toggleRemaining.addEventListener('change', () => {
                 remainingList.style.display = toggleRemaining.checked ? '' : 'none';
             });
+            // estado inicial: toggle padrão OFF -> esconder lista
+            remainingList.style.display = toggleRemaining.checked ? '' : 'none';
         }
 
         initPool();
