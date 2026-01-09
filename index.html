@@ -82,11 +82,7 @@
                 <span id="label-number" class="text-[12rem] md:text-[8rem] font-black text-gray-900 leading-none number-display">JOGAR!</span>
             </div>
 
-            <!-- Overlay de Carregamento da IA -->
-            <div id="ai-loading" class="hidden absolute bottom-6 flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full shadow-sm">
-                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                <span class="text-sm font-bold text-red-600">IA Gerando Voz...</span>
-            </div>
+            <!-- (Removido overlay de loading da IA) -->
         </div>
 
         <!-- CONFIGURAÇÕES E CONTROLES -->
@@ -107,14 +103,9 @@
                 <span class="text-lg font-bold mb-3 text-gray-700">Configuração de Voz</span>
                 <div class="flex items-center gap-4">
                     <span class="font-medium text-gray-500">Local (WAV)</span>
-                    <label class="switch">
-                        <input type="checkbox" id="ai-toggle">
-                        <span class="slider"></span>
-                    </label>
-                    <span class="font-medium text-emerald-600">Gemini IA</span>
                 </div>
                 <p class="text-xs text-gray-400 mt-4 text-center">
-                    A IA precisa de internet. <br> O padrão são os seus arquivos na pasta /audio.
+                    O padrão são os seus arquivos na pasta /audio.
                 </p>
                 <div class="mt-4 w-full flex flex-col items-center">
                     <label class="text-sm text-gray-500 mb-2">Selecionar voz gravada</label>
@@ -159,8 +150,6 @@
         const btnDraw = document.getElementById('btn-draw');
         const btnReset = document.getElementById('btn-reset');
         const historyList = document.getElementById('history-list');
-        const aiToggle = document.getElementById('ai-toggle');
-        const aiLoading = document.getElementById('ai-loading');
         const voiceSelect = document.getElementById('voice-select');
         const voiceCurrent = document.getElementById('voice-current');
         const sortNumeric = document.getElementById('sort-numeric');
@@ -198,7 +187,6 @@
                 return;
             }
 
-            aiLoading.classList.remove('hidden');
             const prompt = `Diga de forma alegre e carinhosa para uma família reunida: Letra ${letter}, número ${number}!`;
 
             try {
@@ -224,8 +212,6 @@
             } catch (err) {
                 console.error("Erro na IA, voltando para local:", err);
                 playLocalAudio(`${letter}${number}`);
-            } finally {
-                aiLoading.classList.add('hidden');
             }
         }
 
@@ -268,12 +254,8 @@
             lblLetter.textContent = picked.l;
             lblNumber.textContent = picked.n;
 
-            // Decide Voz
-            if (aiToggle.checked) {
-                playAiAudio(picked.l, picked.n);
-            } else {
-                playLocalAudio(picked.id);
-            }
+            // Usa áudio local (Gemini não está selecionável)
+            playLocalAudio(picked.id);
 
             updateHistory();
             updateRemaining();
