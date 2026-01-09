@@ -5,60 +5,257 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo da Família Vilaça</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        /* Modern glassy dark theme — improved legibility and refined accents */
+        :root{
+            --bg: #071029; /* deep navy */
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.06);
+            --muted: #9aa5b1;
+            --accent: #f4c95d; /* warm gold */
+            --accent-2: #ffd87a;
+            --btn-blue: #60a5fa;
+            --btn-blue-2: #3b82f6;
+            --silver: #cbd5e1;
+            --white: #ffffff;
+        }
+
+        /* Light theme variables */
+        body.light-theme {
+            --bg: #f8f9fa;
+            --card-bg: rgba(59,130,246,0.02);
+            --card-border: rgba(59,130,246,0.08);
+            --muted: #6b7280;
+            --accent: #d4a63b;
+            --accent-2: #c69d2e;
+            --silver: #374151;
+            --white: #ffffff;
+            --text-primary: #071029;
+        }
+
         body {
-            background-color: #fdf2f2; /* Tom de fundo quente e acolhedor */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 400px at 10% 10%, rgba(255,216,135,0.03), transparent), var(--bg);
+            color: var(--silver);
+            font-family: 'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
+        body.light-theme {
+            background: linear-gradient(180deg, #f8f9fa 0%, #eef0f4 100%);
+            color: var(--text-primary);
+        }
+
         .main-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(6px) saturate(120%);
+            box-shadow: 0 10px 30px rgba(2,6,23,0.6);
         }
+
+        body.light-theme .main-card {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(59,130,246,0.08);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
         .number-display {
-            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
             font-variant-numeric: tabular-nums;
+            color: var(--white);
+            letter-spacing: -1px;
         }
+
+        body.light-theme .number-display {
+            color: var(--text-primary);
+        }
+
         .history-item {
-            animation: slideIn 0.3s ease-out;
+            animation: slideIn 0.28s ease-out;
+            background: #ffffff;
+            border: 1px solid rgba(7,16,41,0.04);
+            color: #071029;
+            padding: .6rem .9rem;
+            border-radius: .75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
+
+        body.light-theme .history-item {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid rgba(59,130,246,0.08);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Custom Switch para a IA */
-        .switch {
-            position: relative;
+
+        /* switches */
+        .switch { position: relative; display: inline-block; width: 56px; height: 30px }
+        .switch input { opacity: 0; width: 0; height: 0 }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.06); border-radius: 999px; transition: .25s }
+        .slider:before { content: ''; position: absolute; left: 4px; top: 4px; width: 22px; height: 22px; background: var(--white); border-radius: 50%; transition: .25s }
+        input:checked + .slider { background: linear-gradient(90deg, rgba(244,201,93,0.15), rgba(255,216,135,0.12)) }
+        input:checked + .slider:before { transform: translateX(26px) }
+
+        body.light-theme .slider { background: rgba(59,130,246,0.1) }
+        body.light-theme input:checked + .slider { background: linear-gradient(90deg, rgba(212,166,59,0.15), rgba(198,157,46,0.12)) }
+
+        /* Buttons */
+        #btn-draw {
+            background: linear-gradient(90deg, rgba(244,201,93,0.12), rgba(255,216,135,0.06));
+            color: var(--accent);
+            border: 1px solid #f4c95d2e;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+        }
+        #btn-draw:hover { transform: translateY(-2px); background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #071029 }
+
+        body.light-theme #btn-draw {
+            background: linear-gradient(90deg, rgba(212,166,59,0.12), rgba(198,157,46,0.06));
+            color: #a08a1e;
+            border: 1px solid rgba(212,166,59,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        body.light-theme #btn-draw:hover { background: linear-gradient(90deg, #d4a63b, #c69d2e); color: #ffffff }
+
+        #btn-repeat {
+            background: linear-gradient(180deg, rgba(96,165,250,0.5), rgba(59,130,246,0.12));
+            border: 1px solid rgba(59,130,246,0.12);
+            color: var(--white);
+            transition: background .18s ease, color .18s ease, transform .12s ease;
+            box-shadow: 0 6px 14px rgba(59,130,246,0.06) inset;
+        }
+        #btn-repeat:hover { transform: translateY(-1px); background: linear-gradient(90deg, var(--btn-blue-2), var(--btn-blue)); color: var(--white) }
+
+        body.light-theme #btn-repeat {
+            background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(59,130,246,0.08));
+            border: 1px solid rgba(59,130,246,0.12);
+            color: #1e3a8a;
+            box-shadow: 0 4px 10px rgba(59,130,246,0.1);
+        }
+        body.light-theme #btn-repeat:hover { background: linear-gradient(90deg, #3b82f6, #60a5fa); color: #ffffff }
+
+        #btn-reset {
+            background: linear-gradient(180deg, rgba(96,165,250,0.5), rgba(59,130,246,0.12));
+            border: 1px solid rgba(59,130,246,0.12);
+            color: var(--white);
+            transition: background .18s ease, color .18s ease, transform .12s ease;
+        }
+        #btn-reset:hover { transform: translateY(-1px); background: linear-gradient(90deg, var(--btn-blue-2), var(--btn-blue)); color: var(--white) }
+
+        body.light-theme #btn-reset {
+            background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(59,130,246,0.08));
+            border: 1px solid rgba(59,130,246,0.12);
+            color: #1e3a8a;
+            transition: background .18s ease, color .18s ease, transform .12s ease;
+        }
+        body.light-theme #btn-reset:hover { background: linear-gradient(90deg, #3b82f6, #60a5fa); color: #ffffff }
+
+        /* disabled appearance for the action buttons */
+        #btn-repeat:disabled, #btn-reset:disabled {
+            opacity: 0.7; caret-color: transparent; cursor: not-allowed;
+            filter: grayscale(10%);
+        }
+
+        /* small helpers */
+        .bg-white { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) }
+        h1 { color: var(--accent); text-shadow: 0 2px 6px rgba(0,0,0,0.6) }
+
+        body.light-theme h1 { color: #a08a1e; text-shadow: none }
+
+        /* labels and small controls should contrast on dark bg - use white for high contrast */
+        .text-gray-600 { color: var(--white) }
+        .text-gray-700 { color: var(--white) }
+        .text-accent { color: var(--accent) }
+        .text-gray-900 { color: var(--white) }
+        .bg-red-50 { background: rgba(255,216,135,0.06); color: var(--accent) }
+
+        body.light-theme .text-gray-600, 
+        body.light-theme .text-gray-700 { color: var(--text-primary) }
+        body.light-theme .text-accent { color: #a08a1e }
+        body.light-theme .text-gray-900 { color: var(--text-primary) }
+
+        /* Standalone text — white in dark mode, dark navy in light mode */
+        .standalone-text {
+            color: #ffffff;
+        }
+
+        body.light-theme .standalone-text {
+            color: #071029;
+        }
+
+        /* make the number badge pop */
+        #label-number {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            padding: .25rem .8rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.03);
             display: inline-block;
-            width: 60px;
-            height: 34px;
         }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
+
+        /* Display panel light card to contrast with dark UI */
+        .display-card {
+            background: #ffffff;
+            color: #071029;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(7,16,41,0.06);
+            box-shadow: 0 12px 30px rgba(2,6,23,0.15);
+        }
+        .display-card #label-number { color: #071029; }
+        .display-card #label-letter { color: var(--accent); }
+
+        body.light-theme .display-card {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid rgba(59,130,246,0.08);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        body.light-theme .display-card #label-letter { color: #a08a1e }
+
+        /* Theme toggle button */
+        #theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            padding: .6rem 1rem;
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: .75rem;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
+            font-size: .9rem;
+            font-weight: 600;
+            transition: all .3s ease;
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px; width: 26px;
-            left: 4px; bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+
+        #theme-toggle:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.2);
         }
-        input:checked + .slider { background-color: #10b981; }
-        input:checked + .slider:before { transform: translateX(26px); }
+
+        body.light-theme #theme-toggle {
+            background: rgba(59,130,246,0.1);
+            color: #1e3a8a;
+            border: 1px solid rgba(59,130,246,0.1);
+        }
+
+        body.light-theme #theme-toggle:hover {
+            background: rgba(59,130,246,0.15);
+            border-color: rgba(59,130,246,0.2);
+        }
     </style>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col items-center">
 
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle">🌙 Dark</button>
+
     <!-- CABEÇALHO E FOTO DA FAMÍLIA -->
     <header class="w-full max-w-5xl px-6 pt-10 pb-6 text-center">
-        <h1 class="text-5xl md:text-6xl font-black text-red-600 drop-shadow-sm mb-4">
+        <h1 class="text-5xl md:text-6xl font-black drop-shadow-sm mb-4">
             Bingo da Família Vilaça
         </h1>
         
@@ -69,17 +266,17 @@
                 <img src="familia.jpg" alt="Foto da Família Vilaça" class="w-full h-auto object-contain object-center block" onerror="this.src='https://via.placeholder.com/1200x600?text=Família+Vilaça'">
             </div>
         </div>
-        <p class="text-xl text-gray-600 italic">"Todo mundo aqui ama esse bingo!"</p>
+        <p class="text-xl standalone-text italic">Todo mundo aqui ama esse bingo!</p>
     </header>
 
     <!-- ÁREA PRINCIPAL -->
     <main class="w-full max-w-4xl px-4 flex flex-col items-center">
         
         <!-- Painel de Exibição -->
-        <div id="display-panel" class="main-card w-full rounded-[3rem] p-10 border-4 border-red-500 flex flex-col items-center justify-center relative">
+        <div id="display-panel" class="main-card display-card w-full rounded-[3rem] p-10 flex flex-col items-center justify-center relative">
             <div id="current-call" class="text-center">
-                <span id="label-letter" class="text-4xl md:text-6xl font-bold text-red-600 block leading-none">VAMOS</span>
-                <span id="label-number" class="text-[4rem] md:text-[6rem] font-black text-gray-900 leading-none number-display">JOGAR!</span>
+                <span id="label-letter" class="text-4xl md:text-6xl font-bold block leading-none">VAMOS</span>
+                <span id="label-number" class="text-[4rem] md:text-[6rem] font-black leading-none number-display">JOGAR!</span>
             </div>
 
             <!-- (Removido overlay de loading da IA) -->
@@ -90,10 +287,10 @@
             
             <!-- Botões Principais -->
             <div class="flex flex-col gap-4">
-                <button id="btn-draw" class="bg-red-600 hover:bg-red-700 text-white text-4xl font-bold py-6 rounded-2xl shadow-xl transition-transform active:scale-95">
+                <button id="btn-draw" class="text-4xl font-bold py-6 rounded-2xl transition-transform active:scale-95 shadow-sm">
                     SORTEAR NÚMEROS
                 </button>
-                <button id="btn-repeat" class="bg-yellow-500 hover:bg-yellow-600 text-white text-2xl font-bold py-3 rounded-2xl shadow transition-transform active:scale-95 mt-2" disabled>
+                <button id="btn-repeat" class="text-2xl font-bold py-3 rounded-2xl transition-transform active:scale-95 mt-2 shadow-sm" disabled>
                     Repetir Som
                 </button>
             </div>
@@ -122,8 +319,8 @@
         <!-- HISTÓRICO -->
         <div class="w-full mt-10 mb-20">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-gray-700 border-b-2 border-red-200 pb-2">Números Sorteados:</h2>
-                <label class="flex items-center gap-2 text-sm text-gray-600">
+                <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Sorteados:</h2>
+                <label class="flex items-center gap-2 text-sm standalone-text">
                     <input id="sort-numeric" type="checkbox" class="form-checkbox h-4 w-4"> Ordenar numericamente
                 </label>
             </div>
@@ -132,8 +329,8 @@
             </div>
             <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-2xl font-bold text-gray-700 border-b-2 border-red-200 pb-2">Números Remanescentes:</h2>
-                    <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Remanescentes:</h2>
+                    <label class="flex items-center gap-2 text-sm standalone-text">
                         <input id="toggle-remaining" type="checkbox" class="form-checkbox h-4 w-4">
                         Mostrar
                     </label>
@@ -320,8 +517,8 @@
             }
 
             historyList.innerHTML = listOrder.map(item => `
-                <div class="history-item bg-white border-2 border-red-200 px-4 py-2 rounded-xl shadow-sm text-lg font-bold text-gray-700">
-                    <span class="text-red-600">${item.l}</span>${item.n}
+                <div class="history-item px-4 py-2 rounded-xl shadow-sm text-lg font-bold">
+                    <span style="color:#071029; margin-right:.4rem">${item.l}</span>${item.n}
                 </div>
             `).join('');
         }
@@ -337,7 +534,7 @@
             remainingList.innerHTML = remaining.map(n => {
                 const letter = letters[Math.floor((n - 1) / 15)];
                 return `
-                <div class="px-3 py-2 rounded-xl bg-red-50 text-red-700 font-bold border border-red-200">${letter}${n}</div>
+                <div class="px-3 py-2 rounded-xl font-bold" style="background:#ffffff; color:#071029; border:1px solid rgba(7,16,41,0.04); box-shadow:0 2px 8px rgba(0,0,0,0.04)">${letter}${n}</div>
             `;
             }).join('');
         }
@@ -408,6 +605,22 @@
         // Inicializa histórico e remanescentes
         updateHistory();
         updateRemaining();
+
+        // --- Theme Toggle ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '☀️ Light';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            const newTheme = isLight ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+        });
     </script>
 </body>
 </html>
