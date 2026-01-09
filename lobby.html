@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo da Família Vilaça - Lobby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col items-center justify-center">
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle">🌙 Dark</button>
+
+    <!-- LOBBY CONTAINER -->
+    <main class="w-full max-w-2xl px-4 flex flex-col items-center justify-center">
+        
+        <!-- Logo/Header -->
+        <div class="mb-12 text-center">
+            <h1 class="text-5xl md:text-7xl font-black drop-shadow-sm mb-6">
+                Bingo da Família Vilaça
+            </h1>
+            
+            <!-- Foto da Família -->
+            <div class="flex justify-center mb-8 w-full">
+                <div class="max-w-2xl relative overflow-hidden shadow-xl border-4 border-white bg-gray-200 mx-auto rounded-2xl">
+                    <img src="familia.jpg" alt="Foto da Família Vilaça" class="w-full h-auto object-contain object-center block" onerror="this.src='https://via.placeholder.com/1000x500?text=Família+Vilaça'">
+                </div>
+            </div>
+
+            <p class="text-2xl standalone-text font-bold mb-4">
+                Bem-vindo ao Bingo!
+            </p>
+            <p class="text-lg standalone-text opacity-80 mb-8">
+                Todos amam participar!</p>
+            </p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="w-full flex flex-col gap-6 max-w-sm">
+            <a href="game.html" class="text-center text-4xl font-bold py-6 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-gold" id="btn-play">
+                COMEÇAR JOGO
+            </a>
+
+            <button id="btn-settings" class="text-2xl font-bold py-4 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-blue">
+                CONFIGURAÇÕES
+            </button>
+
+            <button id="btn-about" class="text-2xl font-bold py-4 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-blue">
+                SOBRE
+            </button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-40">
+            <div class="main-card rounded-3xl p-8 max-w-md w-full mx-4">
+                <h2 class="text-3xl font-bold text-accent mb-6">Configurações</h2>
+                
+                <div class="mb-6">
+                    <label class="text-lg font-semibold modal-text block mb-3">Selecionar voz gravada</label>
+                    <select id="lobby-voice-select" class="w-full rounded-lg border px-4 py-3 text-base">
+                        <option value="Danielle">Danielle</option>
+                    </select>
+                    <p class="text-sm modal-text opacity-60 mt-2">Pasta atual: <span id="lobby-voice-current">Danielle</span></p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-3 text-lg font-semibold modal-text cursor-pointer">
+                        <input id="lobby-auto-sound" type="checkbox" class="form-checkbox h-5 w-5">
+                        Usar som automático
+                    </label>
+                    <p class="text-sm modal-text opacity-60 mt-2">Reproduz o áudio ao sortear cada número</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button id="close-settings" class="flex-1 py-3 rounded-lg font-bold text-base">
+                        Fechar
+                    </button>
+                    <button id="confirm-settings" class="flex-1 py-3 rounded-lg font-bold text-base btn-primary-gold">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Modal -->
+        <div id="about-modal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-40">
+            <div class="main-card rounded-3xl p-8 max-w-md w-full mx-4">
+                <h2 class="text-3xl font-bold text-accent mb-4">Sobre o Jogo</h2>
+                
+                <div class="modal-text text-base mb-6 space-y-4">
+                    <p>
+                        <strong>Bingo da Família Vilaça</strong> é um jogo divertido para reunir toda a família e aproveitar momentos especiais juntos.
+                    </p>
+                    <p>
+                        Com suporte a áudio personalizado, você pode usar suas próprias vozes gravadas para tornar a experiência ainda mais significativa.
+                    </p>
+                    <p>
+                        <strong>Como jogar:</strong> Clique em "COMEÇAR JOGO" para iniciar uma rodada. Cada número será sorteado com áudio personalizado.
+                    </p>
+                </div>
+
+                <button id="close-about" class="w-full py-3 rounded-lg font-bold text-base">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Theme Toggle ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeToggle.textContent = '☀️ Light';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            const newTheme = isLight ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+        });
+
+        // --- Settings Modal ---
+        const settingsModal = document.getElementById('settings-modal');
+        const aboutModal = document.getElementById('about-modal');
+        const btnSettings = document.getElementById('btn-settings');
+        const btnAbout = document.getElementById('btn-about');
+        const closeSettings = document.getElementById('close-settings');
+        const closeAbout = document.getElementById('close-about');
+        const confirmSettings = document.getElementById('confirm-settings');
+        const lobbyVoiceSelect = document.getElementById('lobby-voice-select');
+        const lobbyVoiceCurrent = document.getElementById('lobby-voice-current');
+        const lobbyAutoSound = document.getElementById('lobby-auto-sound');
+
+        // Load saved settings from localStorage
+        function loadSettings() {
+            const savedVoice = localStorage.getItem('voiceFolder') || 'Danielle';
+            const savedAutoSound = localStorage.getItem('autoSound') === 'true';
+            
+            lobbyVoiceSelect.value = savedVoice;
+            lobbyVoiceCurrent.textContent = savedVoice;
+            lobbyAutoSound.checked = savedAutoSound;
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            localStorage.setItem('voiceFolder', lobbyVoiceSelect.value);
+            localStorage.setItem('autoSound', lobbyAutoSound.checked);
+            lobbyVoiceCurrent.textContent = lobbyVoiceSelect.value;
+        }
+
+        btnSettings.addEventListener('click', () => {
+            settingsModal.classList.remove('hidden');
+        });
+
+        btnAbout.addEventListener('click', () => {
+            aboutModal.classList.remove('hidden');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        closeAbout.addEventListener('click', () => {
+            aboutModal.classList.add('hidden');
+        });
+
+        confirmSettings.addEventListener('click', () => {
+            saveSettings();
+            settingsModal.classList.add('hidden');
+        });
+
+        // Close modals on outside click
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) settingsModal.classList.add('hidden');
+        });
+
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) aboutModal.classList.add('hidden');
+        });
+
+        // Initialize settings
+        loadSettings();
+    </script>
+</body>
+</html>
