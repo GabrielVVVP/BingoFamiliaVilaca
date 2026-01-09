@@ -39,16 +39,62 @@ body.light-theme {
 }
 
 .main-card {
-    background: var(--card-bg);
+    background: #ffffff;
     border: 1px solid var(--card-border);
     backdrop-filter: blur(6px) saturate(120%);
     box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    color: #071029;
 }
 
 body.light-theme .main-card {
-    background: rgba(255,255,255,0.6);
+    background: #ffffff;
     border: 1px solid rgba(59,130,246,0.08);
     box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    color: var(--text-primary);
+}
+
+/* Modal card specific styling */
+#settings-modal .main-card,
+#about-modal .main-card {
+    color: inherit;
+}
+
+body.light-theme #settings-modal .main-card,
+body.light-theme #about-modal .main-card {
+    color: var(--text-primary);
+}
+
+/* Modal close buttons */
+#close-settings,
+#close-about {
+    background: linear-gradient(180deg, rgba(96,165,250,0.5), rgba(59,130,246,0.12));
+    border: 1px solid rgba(59,130,246,0.12);
+    color: #071029;
+    transition: background .18s ease, color .18s ease;
+}
+
+#close-settings:hover,
+#close-about:hover {
+    background: linear-gradient(90deg, rgba(59,130,246,0.3), rgba(96,165,250,0.2));
+    color: #071029;
+}
+
+/* Remove shadow from confirm button */
+#confirm-settings {
+    box-shadow: none !important;
+}
+
+body.light-theme #close-settings,
+body.light-theme #close-about {
+    background: linear-gradient(180deg, rgba(59,130,246,0.15), rgba(59,130,246,0.1));
+    border: 1px solid rgba(59,130,246,0.2);
+    color: #071029;
+}
+
+body.light-theme #close-settings:hover,
+body.light-theme #close-about:hover {
+    background: linear-gradient(90deg, rgba(59,130,246,0.3), rgba(96,165,250,0.25));
+    color: #071029;
 }
 
 .number-display {
@@ -150,6 +196,40 @@ body.light-theme #btn-reset:hover { background: linear-gradient(90deg, #3b82f6, 
     filter: grayscale(10%);
 }
 
+/* Back button */
+#btn-back {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 40;
+    padding: .6rem 1rem;
+    background: linear-gradient(180deg, rgba(96,165,250,0.5), rgba(59,130,246,0.12));
+    border: 1px solid rgba(59,130,246,0.12);
+    color: var(--white);
+    border-radius: .75rem;
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 600;
+    transition: all .3s ease;
+}
+
+#btn-back:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(90deg, var(--btn-blue-2), var(--btn-blue));
+    color: var(--white);
+}
+
+body.light-theme #btn-back {
+    background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(59,130,246,0.12);
+    color: #1e3a8a;
+}
+
+body.light-theme #btn-back:hover {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    color: #ffffff;
+}
+
 /* small helpers */
 .bg-white { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)) }
 h1 { color: var(--accent); text-shadow: 0 2px 6px rgba(0,0,0,0.6) }
@@ -174,6 +254,10 @@ body.light-theme .text-gray-900 { color: var(--text-primary) }
 }
 
 body.light-theme .standalone-text {
+    color: #071029;
+}
+
+.modal-text {
     color: #071029;
 }
 
@@ -236,4 +320,62 @@ body.light-theme #theme-toggle {
 body.light-theme #theme-toggle:hover {
     background: rgba(59,130,246,0.15);
     border-color: rgba(59,130,246,0.2);
+}
+
+/* Lobby button styles */
+.btn-primary-gold {
+    background: linear-gradient(90deg, rgba(244,201,93,0.12), rgba(255,216,135,0.06));
+    color: var(--accent);
+    border: 1px solid #f4c95d2e;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    transition: background .18s ease, color .18s ease, transform .12s ease;
+}
+.btn-primary-gold:hover { 
+    transform: translateY(-2px); 
+    background: linear-gradient(90deg, var(--accent), var(--accent-2)); 
+    color: #071029 
+}
+
+body.light-theme .btn-primary-gold {
+    background: linear-gradient(90deg, rgba(212,166,59,0.12), rgba(198,157,46,0.06));
+    color: #a08a1e;
+    border: 1px solid rgba(212,166,59,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+body.light-theme .btn-primary-gold:hover { 
+    background: linear-gradient(90deg, #d4a63b, #c69d2e); 
+    color: #ffffff 
+}
+
+.btn-primary-blue {
+    background: linear-gradient(180deg, rgba(96,165,250,0.5), rgba(59,130,246,0.12));
+    border: 1px solid rgba(59,130,246,0.12);
+    color: var(--white);
+    transition: background .18s ease, color .18s ease, transform .12s ease;
+    box-shadow: 0 6px 14px rgba(59,130,246,0.06) inset;
+}
+.btn-primary-blue:hover { 
+    transform: translateY(-1px); 
+    background: linear-gradient(90deg, var(--btn-blue-2), var(--btn-blue)); 
+    color: var(--white) 
+}
+
+body.light-theme .btn-primary-blue {
+    background: linear-gradient(180deg, rgba(59,130,246,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(59,130,246,0.12);
+    color: #1e3a8a;
+    box-shadow: 0 4px 10px rgba(59,130,246,0.1);
+}
+body.light-theme .btn-primary-blue:hover { 
+    background: linear-gradient(90deg, #3b82f6, #60a5fa); 
+    color: #ffffff 
+}
+
+/* Modal overlay */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+body.light-theme .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.2);
 }
