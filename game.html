@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col items-center">
 
@@ -53,7 +54,7 @@
         <!-- HISTÓRICO -->
         <div class="w-full mt-10 mb-20">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Sorteados:</h2>
+                <h2 id="drawn-title" class="text-2xl font-bold text-accent border-b-2 pb-2">Números Sorteados:</h2>
                 <label class="flex items-center gap-2 text-sm standalone-text">
                     <input id="sort-numeric" type="checkbox" class="form-checkbox h-4 w-4"> Ordenar numericamente
                 </label>
@@ -63,7 +64,7 @@
             </div>
             <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Remanescentes:</h2>
+                    <h2 id="remaining-title" class="text-2xl font-bold text-accent border-b-2 pb-2">Números Remanescentes:</h2> 
                     <label class="flex items-center gap-2 text-sm standalone-text">
                         <input id="toggle-remaining" type="checkbox" class="form-checkbox h-4 w-4">
                         Mostrar
@@ -71,7 +72,7 @@
                 </div>
                 <div id="remaining-list" class="flex flex-wrap gap-2"></div>
                 <div class="mt-4 flex justify-center">
-                    <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 px-6 rounded-xl transition-all">REINICIAR JOGO</button>
+                    <button id="btn-reset" class="bg-gray-400 hover:bg-gray-500 text-white text-xl py-3 px-6 rounded-xl transition-all">TEMOS UM VENCEDOR!</button>
                 </div>
             </div>
         </div>
@@ -92,6 +93,8 @@
         const btnRepeat = document.getElementById('btn-repeat');
         const btnBack = document.getElementById('btn-back');
         const historyList = document.getElementById('history-list');
+        const drawnTitle = document.getElementById('drawn-title');
+        const remainingTitle = document.getElementById('remaining-title');
         const sortNumeric = document.getElementById('sort-numeric');
         const remainingList = document.getElementById('remaining-list');
         const toggleRemaining = document.getElementById('toggle-remaining');
@@ -113,12 +116,14 @@
         // --- SISTEMA DE ÁUDIO ---
 
         // 1. Áudio Local (Seus WAVs)
-        function playLocalAudio(id) {
+        function playLocalAudio(id, silvioMode = null) {
             // Não inicia novo áudio enquanto outro estiver tocando
             if (isPlaying) return;
-
             const folderPath = voiceFolder ? `audio/${voiceFolder}/` : 'audio/';
             const path = `${folderPath}${id}.wav`;
+            if (silvioMode) {
+                path = `${folderPath}${silvioMode}.wav`;
+            }
             const audio = new Audio(path);
             currentAudio = audio;
             isPlaying = true;
@@ -254,6 +259,8 @@
                     <span style="color:#071029; margin-right:.4rem">${item.l}</span>${item.n}
                 </div>
             `).join('');
+            drawnTitle.textContent = `Números Sorteados: ${drawn.length}`;
+            remainingTitle.textContent = `Números Remanescentes: ${75 - drawn.length}`;
         }
 
         function updateRemaining() {
@@ -287,18 +294,29 @@
             btnRepeat.disabled = true;
         }
         btnReset.addEventListener('click', () => {
-            if(confirm("Deseja reiniciar o Bingo da Família Vilaça?")) {
+            if(confirm("Temos um novo vencedor no Bingo da Família Vilaça? (Reiniciar partida)")) {
+                playLocalAudio(silvioMode = `parabens`);
+                    let params = {
+                    particleCount: 500, // Quantidade de confetes
+                    spread: 90, // O quanto eles se espalham
+                    startVelocity: 70, // Velocidade inicial
+                    origin: { x: 0, y: 0.5 }, // Posição inicial na tela
+                    angle: 45 // Ângulo em que os confetes serão lançados
+                };
+
+                // Joga confetes da esquerda pra direita
+                confetti(params);
                 initPool();
                 drawn = [];
                 lblLetter.textContent = "PRONTOS?";
                 lblNumber.textContent = "VAMOS MAIS UMA!";
                 historyList.innerHTML = "";
                 // para segurança, interrompe qualquer áudio em reprodução
-                if (currentAudio) {
-                    try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (e) {}
-                    currentAudio = null;
-                }
-                isPlaying = false;
+                //if (currentAudio) {
+                //    try { currentAudio.pause(); currentAudio.currentTime = 0; } catch (e) {}
+                //    currentAudio = null;
+                //}
+                //isPlaying = false;
                 btnDraw.disabled = false;
                 if (btnRepeat) {
                     btnRepeat.disabled = true;
