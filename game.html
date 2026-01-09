@@ -53,7 +53,7 @@
         <!-- HISTÓRICO -->
         <div class="w-full mt-10 mb-20">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Sorteados:</h2>
+                <h2 id="drawn-title" class="text-2xl font-bold text-accent border-b-2 pb-2">Números Sorteados:</h2>
                 <label class="flex items-center gap-2 text-sm standalone-text">
                     <input id="sort-numeric" type="checkbox" class="form-checkbox h-4 w-4"> Ordenar numericamente
                 </label>
@@ -63,7 +63,7 @@
             </div>
             <div class="mt-6">
                 <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-2xl font-bold text-accent border-b-2 pb-2">Números Remanescentes:</h2>
+                    <h2 id="remaining-title" class="text-2xl font-bold text-accent border-b-2 pb-2">Números Remanescentes:</h2> 
                     <label class="flex items-center gap-2 text-sm standalone-text">
                         <input id="toggle-remaining" type="checkbox" class="form-checkbox h-4 w-4">
                         Mostrar
@@ -92,6 +92,8 @@
         const btnRepeat = document.getElementById('btn-repeat');
         const btnBack = document.getElementById('btn-back');
         const historyList = document.getElementById('history-list');
+        const drawnTitle = document.getElementById('drawn-title');
+        const remainingTitle = document.getElementById('remaining-title');
         const sortNumeric = document.getElementById('sort-numeric');
         const remainingList = document.getElementById('remaining-list');
         const toggleRemaining = document.getElementById('toggle-remaining');
@@ -254,6 +256,8 @@
                     <span style="color:#071029; margin-right:.4rem">${item.l}</span>${item.n}
                 </div>
             `).join('');
+            drawnTitle.textContent = `Números Sorteados: ${drawn.length}`;
+            remainingTitle.textContent = `Números Remanescentes: ${75 - drawn.length}`;
         }
 
         function updateRemaining() {
