@@ -7,6 +7,75 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Pasta de voz selecionada (padrão = Danielle)
+        let voiceFolder = localStorage.getItem('voiceFolder') || 'Danielle';
+        let skipIntro = localStorage.getItem('skipIntro') === 'true';
+        let isPlaying = false;
+        let currentAudio = null;
+
+        /**
+         * Função para tocar áudio local
+         */
+        function playLocalAudio(id, silvioMode = null) {
+            if (isPlaying) return;
+            const folderPath = voiceFolder ? `audio/${voiceFolder}/` : 'audio/';
+            let path = silvioMode ? `${folderPath}${silvioMode}.wav` : `${folderPath}${id}.wav`;
+            
+            const audio = new Audio(path);
+            currentAudio = audio;
+            isPlaying = true;
+
+            audio.play().catch(err => {
+                console.warn(`Falha ao reproduzir ${path}:`, err);
+                isPlaying = false;
+            });
+
+            audio.addEventListener('ended', () => {
+                isPlaying = false;
+                currentAudio = null;
+            });
+        }
+
+        /**
+         * Função específica para iniciar o jogo com áudio e redirecionamento
+         */
+        function handleStartGame(event) {
+            // Previne o comportamento padrão do link
+            event.preventDefault();
+            
+            // Se o usuário optou por pular a introdução, redireciona imediatamente
+            if (skipIntro) {
+                window.location.href = 'game.html';
+                return;
+            }
+
+            if (isPlaying) return;
+
+            const folderPath = voiceFolder ? `audio/${voiceFolder}/` : 'audio/';
+            const path = `${folderPath}abertura.wav`;
+            const audio = new Audio(path);
+            
+            currentAudio = audio;
+            isPlaying = true;
+
+            // Feedback visual no botão enquanto carrega/toca
+            const btn = document.getElementById('btn-play');
+            btn.textContent = "CARREGANDO...";
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            audio.play().then(() => {
+                btn.textContent = "OUVINDO ABERTURA...";
+                // Quando o áudio terminar, redireciona
+                audio.addEventListener('ended', () => {
+                    window.location.href = 'game.html';
+                });
+            }).catch(err => {
+                console.warn("Áudio de abertura não encontrado ou falhou. Iniciando jogo...", err);
+                window.location.href = 'game.html';
+            });
+        }
+    </script>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col items-center justify-center">
 
@@ -39,7 +108,7 @@
 
         <!-- Buttons -->
         <div class="w-full flex flex-col gap-6 max-w-sm mb-20">
-            <a href="game.html" class="text-center text-4xl font-bold py-6 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-gold" id="btn-play">
+            <a href="game.html" onclick="handleStartGame(event)" class="text-center text-4xl font-bold py-6 rounded-2xl transition-transform active:scale-95 shadow-sm btn-primary-gold" id="btn-play">
                 COMEÇAR JOGO
             </a>
 
@@ -65,6 +134,12 @@
                     <p class="text-sm modal-text opacity-60 mt-2">Pasta atual: <span id="lobby-voice-current">Danielle</span></p>
                 </div>
 
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <input type="checkbox" id="skip-intro-checkbox" class="w-6 h-6 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="skip-intro-checkbox" class="text-base font-semibold modal-text cursor-pointer">Pular áudio de introdução</label>
+                </div>
+
+
                 <div class="flex gap-3">
                     <button id="close-settings" class="flex-1 py-3 rounded-lg font-bold text-base">
                         Fechar
@@ -86,7 +161,7 @@
                         <strong>O Bingo da Família Vilaça</strong> é um jogo divertido com o objetivo de reunir todo mundo, agora em versão digital para facilitar ainda mais a diversão!
                     </p>
                     <p>
-                        <strong>Como jogar:</strong> Clique em "COMEÇAR JOGO" para iniciar uma rodada. Depois clique em "SORTEAR NÚMERO" para começar a sortear o número da rodada. Cada número será sorteado com o áudio escolhido. Para escutar novamente, clique em "REPETIR SOM". Para sortear o próximo número, clique novamente em "SORTEAR NÚMERO". Para encerrar o jogo e começar outro é só clicar em "REINICIAR JOGO".
+                        <strong>Como jogar:</strong> Clique em "COMEÇAR JOGO" para iniciar uma rodada. Depois clique em "SORTEAR NÚMERO" para começar a sortear o número da rodada. Cada número será sorteado com o áudio escolhido. Para escutar novamente, clique em "REPETIR SOM". Para sortear o próximo número, clique novamente em "SORTEAR NÚMERO". Para encerrar o jogo e começar outro é só clicar em "TEMOS UM VENCEDOR!".
                     </p>
                     <p>
                         <strong>Temas:</strong> A interface do jogo pode ser alterada entre temas claros (☀️ Light) e escuros (🌙 Dark), que ficam no canto superior direito da tela. 
@@ -129,19 +204,31 @@
         const confirmSettings = document.getElementById('confirm-settings');
         const lobbyVoiceSelect = document.getElementById('lobby-voice-select');
         const lobbyVoiceCurrent = document.getElementById('lobby-voice-current');
+        const skipIntroCheckbox = document.getElementById('skip-intro-checkbox');
 
         // Load saved settings from localStorage
         function loadSettings() {
             const savedVoice = localStorage.getItem('voiceFolder') || 'Danielle';
-            
+            const savedSkipIntro = localStorage.getItem('skipIntro') === 'true';
+
             lobbyVoiceSelect.value = savedVoice;
             lobbyVoiceCurrent.textContent = savedVoice;
+            skipIntroCheckbox.checked = savedSkipIntro;
+
+            voiceFolder = savedVoice;
+            skipIntro = savedSkipIntro;
         }
 
         // Save settings to localStorage
         function saveSettings() {
             localStorage.setItem('voiceFolder', lobbyVoiceSelect.value);
+            localStorage.setItem('skipIntro', skipIntroCheckbox.checked);
+            
             lobbyVoiceCurrent.textContent = lobbyVoiceSelect.value;
+            
+            // IMPORTANTE: Atualiza a variável global para que a mudança tenha efeito imediato
+            voiceFolder = lobbyVoiceSelect.value;
+            skipIntro = skipIntroCheckbox.checked;
         }
 
         btnSettings.addEventListener('click', () => {
