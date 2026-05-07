@@ -139,6 +139,17 @@
                         <label for="skip-intro-checkbox" class="text-base font-semibold modal-text cursor-pointer">Pular áudio de introdução</label>
                 </div>
 
+                <!-- MODO ANIVERSÁRIO (FEATURE PEDIDA) -->
+                <div class="p-4 bg-yellow-50 rounded-2xl border-2 border-yellow-200 mb-6">
+                    <label class="text-lg font-bold text-yellow-800 block mb-2">🎈 Modo Comemorativo</label>
+                    <p class="text-xs text-yellow-700 mb-3 italic">Para comemorar eventos especiais.</p>
+                    <select id="special-mode-select" class="w-full rounded-lg border-2 border-yellow-300 px-4 py-3 text-base font-bold text-yellow-900 bg-white">
+                        <option value="none">Desativado (Aleatório)</option>
+                        <option value="card1">A</option>
+                        <option value="card2">B</option>
+                    </select>
+                </div>
+
 
                 <div class="flex gap-3">
                     <button id="close-settings" class="flex-1 py-3 rounded-lg font-bold text-base">
@@ -205,30 +216,37 @@
         const lobbyVoiceSelect = document.getElementById('lobby-voice-select');
         const lobbyVoiceCurrent = document.getElementById('lobby-voice-current');
         const skipIntroCheckbox = document.getElementById('skip-intro-checkbox');
+        const specialModeSelect = document.getElementById('special-mode-select');
 
         // Load saved settings from localStorage
         function loadSettings() {
             const savedVoice = localStorage.getItem('voiceFolder') || 'Danielle';
             const savedSkipIntro = localStorage.getItem('skipIntro') === 'true';
+            const savedSpecialMode = localStorage.getItem('specialMode') || 'none';
 
             lobbyVoiceSelect.value = savedVoice;
             lobbyVoiceCurrent.textContent = savedVoice;
             skipIntroCheckbox.checked = savedSkipIntro;
+            specialModeSelect.value = savedSpecialMode;
 
             voiceFolder = savedVoice;
             skipIntro = savedSkipIntro;
+            specialMode = savedSpecialMode;
+
         }
 
         // Save settings to localStorage
         function saveSettings() {
             localStorage.setItem('voiceFolder', lobbyVoiceSelect.value);
             localStorage.setItem('skipIntro', skipIntroCheckbox.checked);
+            localStorage.setItem('specialMode', specialModeSelect.value);
             
             lobbyVoiceCurrent.textContent = lobbyVoiceSelect.value;
             
             // IMPORTANTE: Atualiza a variável global para que a mudança tenha efeito imediato
             voiceFolder = lobbyVoiceSelect.value;
             skipIntro = skipIntroCheckbox.checked;
+            specialMode = specialModeSelect.value;
         }
 
         btnSettings.addEventListener('click', () => {

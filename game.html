@@ -85,6 +85,15 @@
         let pool = [];
         let drawn = [];
 
+        // Modo especial (comemorativo)
+        let specialMode = localStorage.getItem('specialMode') || 'none';
+        let riggedSequence = [];
+        let riggedIndex = 0;
+
+        // Cartelas especiais (exemplo - ajustar conforme necessário)
+        const card1 = [2,3,6,10,15,18,21,23,27,29,31,33,34,41,46,50,54,56,59,68,69,72,73,75];
+        const card2 = [1,2,5,9,14,17,20,22,26,28,32,33,40,42,49,53,55,58,60,67,68,71,72,74];
+
         // Elementos DOM
         const lblLetter = document.getElementById('label-letter');
         const lblNumber = document.getElementById('label-number');
@@ -111,6 +120,34 @@
                 const letter = letters[Math.floor((i - 1) / 15)];
                 pool.push({ l: letter, n: i, id: `${letter}${i}` });
             }
+
+            // Se modo especial ativo, preparar sequência rigged
+            if (specialMode !== 'none') {
+                prepareRiggedSequence();
+            }
+        }
+
+        function prepareRiggedSequence() {
+            let targetCard = specialMode === 'card1' ? card1 : card2;
+            let sequence = [...targetCard];
+
+            // Adicionar 6 números aleatórios não presentes na cartela
+            let availableNumbers = [];
+            for (let i = 1; i <= 75; i++) {
+                if (!targetCard.includes(i)) {
+                    availableNumbers.push(i);
+                }
+            }
+
+            // Selecionar 25 números aleatórios dos disponíveis
+            for (let i = 0; i < 25; i++) {
+                let randomIndex = Math.floor(Math.random() * availableNumbers.length);
+                sequence.push(availableNumbers.splice(randomIndex, 1)[0]);
+            }
+
+            // Embaralhar a sequência para não ser óbvio
+            riggedSequence = sequence.sort(() => Math.random() - 0.5);
+            riggedIndex = 0;
         }
 
         // --- SISTEMA DE ÁUDIO ---
@@ -229,8 +266,24 @@
                 return;
             }
 
-            const idx = Math.floor(Math.random() * pool.length);
-            const picked = pool.splice(idx, 1)[0];
+            let picked;
+            if (specialMode !== 'none' && riggedIndex < riggedSequence.length) {
+                // Modo especial: usar sequência pré-definida
+                const targetNumber = riggedSequence[riggedIndex++];
+                picked = pool.find(item => item.n === targetNumber);
+                if (picked) {
+                    pool.splice(pool.indexOf(picked), 1);
+                } else {
+                    // Fallback se o número já foi sorteado (não deveria acontecer)
+                    const idx = Math.floor(Math.random() * pool.length);
+                    picked = pool.splice(idx, 1)[0];
+                }
+            } else {
+                // Modo normal: aleatório
+                const idx = Math.floor(Math.random() * pool.length);
+                picked = pool.splice(idx, 1)[0];
+            }
+
             drawn.push(picked);
 
             // Atualiza UI
@@ -308,6 +361,7 @@
                 confetti(params);
                 initPool();
                 drawn = [];
+                riggedIndex = 0; // Reinicializar índice da sequência rigged
                 lblLetter.textContent = "PRONTOS?";
                 lblNumber.textContent = "VAMOS MAIS UMA!";
                 historyList.innerHTML = "";
